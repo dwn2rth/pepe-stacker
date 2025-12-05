@@ -3,7 +3,7 @@ name: PEPE Stacker
 on:
   schedule:
     # Runs every hour
-    - cron: '0 * * * *'
+    - cron: '*/10 * * * *'
   
   # Allows manual trigger from GitHub UI
   workflow_dispatch:

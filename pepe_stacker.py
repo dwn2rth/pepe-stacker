@@ -12,8 +12,8 @@ AGENT_ID = os.environ.get("AGENT_ID")
 FUND_NAME = "PEPE Stacker"
 CURRENT_TOKEN = "0xc09C8242Eb21B24298303799Bb5Af402A2957777"
 BASE_CURRENCY = "MON"
-BUY_WEIGHT = 3                # 3% every hour
-MIN_TRADE_SIZE_USD = 1
+BUY_WEIGHT = 3                # 3% every 10 minutes
+MIN_TRADE_SIZE_USD = 0.5
 
 BASE_URL = "https://api.symphony.io"
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     if success:
         log("✅ Execution complete")
-        log(f"🐸 Next stack in 1 hour")
+        log(f"🐸 Next stack in 10 minutes")
         log("=" * 60)
         sys.exit(0)
     else:
