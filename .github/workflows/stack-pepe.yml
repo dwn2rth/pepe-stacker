@@ -2,16 +2,24 @@ name: PEPE Stacker
 
 on:
   schedule:
-    # Runs once daily at 12:00 UTC (7am EST / 4am PST)
-    - cron: '0 12 * * *'
+    # Runs every hour
+    - cron: '0 * * * *'
   
   # Allows manual trigger from GitHub UI
   workflow_dispatch:
 
+concurrency:
+  group: stack-pepe
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   stack-pepe:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 10
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -21,13 +29,33 @@ jobs:
         with:
           python-version: '3.10'
       
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Validate required secrets
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          AGENT_ID: ${{ secrets.AGENT_ID }}
+        run: |
+          if [ -z "$API_KEY" ] || [ -z "$AGENT_ID" ]; then
+            echo "ERROR: API_KEY and/or AGENT_ID not set in repository secrets"
+            exit 1
+          fi
+
       - name: Install dependencies
         run: |
-          pip install requests
+          # prefer requirements.txt if present, otherwise install requests
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt || python -m pip install requests
       
       - name: Execute PEPE Stacker
         env:
           API_KEY: ${{ secrets.API_KEY }}
           AGENT_ID: ${{ secrets.AGENT_ID }}
         run: |
-          python pepe_stacker.py
+          python -u pepe_stacker.py
